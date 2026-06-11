@@ -4,31 +4,32 @@ const SHEET_NAME = "Requests";
 function doPost(event) {
   try {
     const payload = JSON.parse(event.postData.contents);
-    const sheet = getRequestsSheet();
     const files = payload.files || {};
+    const sheet = getRequestsSheet();
+    const row = [];
 
-    sheet.appendRow([
-      new Date(),
-      payload.source || "",
-      payload.language || "",
-      payload.firstName || "",
-      payload.lastName || "",
-      payload.whatsapp || "",
-      payload.email || "",
-      payload.service || "",
-      payload.departure || "",
-      payload.returnDate || "",
-      payload.travelers || "",
-      payload.comments || "",
-      getUploadedFileName(files.dentalScan),
-      getUploadedFileName(files.panoramicXray),
-    ]);
+    row.push(new Date());
+    row.push(payload.source || "");
+    row.push(payload.language || "");
+    row.push(payload.firstName || "");
+    row.push(payload.lastName || "");
+    row.push(payload.whatsapp || "");
+    row.push(payload.email || "");
+    row.push(payload.service || "");
+    row.push(payload.departure || "");
+    row.push(payload.returnDate || "");
+    row.push(payload.travelers || "");
+    row.push(payload.comments || "");
+    row.push(getUploadedFileName(files.dentalScan));
+    row.push(getUploadedFileName(files.panoramicXray));
+
+    sheet.appendRow(row);
 
     return jsonResponse({ status: "success" });
   } catch (error) {
     return jsonResponse({
       status: "error",
-      message: error.message,
+      message: error.message
     });
   }
 }
@@ -44,22 +45,8 @@ function getRequestsSheet() {
   }
 
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow([
-      "Submitted At",
-      "Source",
-      "Language",
-      "First Name",
-      "Last Name",
-      "WhatsApp",
-      "Email",
-      "Service",
-      "Departure Date",
-      "Return Date",
-      "Number of Travelers",
-      "Comments",
-      "Dental Scan URL",
-      "Panoramic X-ray URL",
-    ]);
+    const headers = "Submitted At|Source|Language|First Name|Last Name|WhatsApp|Email|Service|Departure Date|Return Date|Number of Travelers|Comments|Dental Scan File Name|Panoramic X-ray File Name";
+    sheet.appendRow(headers.split("|"));
   }
 
   return sheet;
