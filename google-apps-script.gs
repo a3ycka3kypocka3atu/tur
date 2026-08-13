@@ -1,6 +1,13 @@
 const SPREADSHEET_ID = "1mRxLlivYxn9Rn9jG4QFJUyJKzIHK5CrFRB961ukwFgw";
 const SHEET_NAME = "Requests";
 
+function doGet() {
+  return jsonResponse({
+    status: "ok",
+    message: "AC Travel form endpoint is live"
+  });
+}
+
 function doPost(event) {
   try {
     const payload = JSON.parse(event.postData.contents);

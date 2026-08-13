@@ -53,17 +53,23 @@ Use this scenario:
 Google Sheets: Watch New Rows -> Telegram Bot: Send a Message
 ```
 
+The broader travel profile keeps the existing sheet structure compatible. The
+selected role is saved in `Service`; interests, destination ideas, budget,
+preferred stays, activity, Wi-Fi, food needs and the people a traveler hopes to
+meet are saved as structured lines inside `Comments`.
+
 Recommended Telegram message fields:
 
 ```text
-New AlbaniaCare request
+New AC Travel profile
 Name: {{First Name}} {{Last Name}}
 WhatsApp: {{WhatsApp}}
 Email: {{Email}}
-Service: {{Service}}
+Role: {{Service}}
 Dates: {{Departure Date}} - {{Return Date}}
 Travelers: {{Number of Travelers}}
 Dental scan: {{Dental Scan URL}}
 Panoramic X-ray: {{Panoramic X-ray URL}}
-Comments: {{Comments}}
+Travel profile:
+{{Comments}}
 ```
