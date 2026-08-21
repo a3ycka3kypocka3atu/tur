@@ -11,7 +11,7 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="AC Travel — особенные места и хорошие люди">
     <meta property="og:description" content="Природа, локальная еда, необычные места и настоящее сообщество путешественников.">
-    <meta property="og:image" content="assets/community-hero.jpg">
+    <meta property="og:image" content="https://tur-zeta.vercel.app/assets/community-hero.jpg">
     <title>AC Travel | Авторские путешествия и сообщество</title>
     <link rel="stylesheet" href="styles.css">
   </head>
@@ -208,7 +208,7 @@
         <div class="section-shell offer-toolbar" aria-label="Фильтр поездок" data-i18n-aria="filterAria">
           <button class="is-active" type="button" data-offer-filter="all" data-i18n="filterAll">Все</button>
           <button type="button" data-offer-filter="nature" data-i18n="filterNature">Природа</button>
-          <button type="button" data-offer-filter="wellbeing" data-i18n="filterWellbeing">Ретриты</button>
+          <button type="button" data-offer-filter="retreat" data-i18n="filterWellbeing">Ретриты</button>
           <button type="button" data-offer-filter="community" data-i18n="filterCommunity">Сообщество</button>
           <button type="button" data-offer-filter="remote" data-i18n="filterRemote">Долгое проживание</button>
         </div>
@@ -236,7 +236,7 @@
             </div>
           </article>
 
-          <article class="offer-card" data-offer-category="wellbeing community">
+          <article class="offer-card" data-offer-category="retreat community">
             <div class="offer-image offer-image-retreat">
               <span class="status-chip status-chip-warm" data-i18n="statusHosts">Ищем место-партнера</span>
               <span class="offer-number">02</span>
@@ -517,23 +517,15 @@
               <label class="field-full"><span data-i18n="foodLabel">Питание и особые требования</span><input name="foodNeeds" placeholder="Вегетарианское, аллергии, без ограничений..." data-i18n-placeholder="foodPlaceholder"></label>
               <label class="field-full"><span data-i18n="peopleLabel">Кого или какие интересы хочется встретить</span><textarea name="peopleToMeet" rows="3" placeholder="Например: предприниматели, творческие люди, любители походов, семьи..." data-i18n-placeholder="peoplePlaceholder"></textarea></label>
               <label class="field-full"><span data-i18n="commentsLabel">Что еще важно</span><textarea name="comments" rows="4" placeholder="Расскажите о темпе, месте, идее поездки или своем проекте." data-i18n-placeholder="commentsPlaceholder"></textarea></label>
-
-              <details class="care-upload" data-care-upload>
-                <summary data-i18n="careUploadSummary">Файлы для стоматологического направления (необязательно)</summary>
-                <p data-i18n="careUploadNote">Добавьте снимки только если уже хотите предварительную оценку. Медицинские решения принимаются напрямую с клиникой.</p>
-                <div class="field-row">
-                  <label><span data-i18n="uploadScanLabel">Снимок зубов</span><input type="file" name="dentalScan" accept="image/*,.pdf"></label>
-                  <label><span data-i18n="uploadXrayLabel">Панорамный снимок</span><input type="file" name="panoramicXray" accept="image/*,.pdf"></label>
-                </div>
-              </details>
             </fieldset>
 
             <label class="consent-field">
               <input type="checkbox" name="contactConsent" required>
-              <span data-i18n="consentText">Согласен получить ответ по этой заявке и подходящие предложения.</span>
+              <span data-i18n="consentText">Согласен на обработку данных из этой заявки для ответа и подбора подходящих предложений.</span>
             </label>
             <button class="button button-forest submit-button" type="submit" data-submit-button data-i18n="submitButton">Создать мой travel profile</button>
             <p class="form-status" role="status" aria-live="polite" data-form-status></p>
+            <p class="form-note" data-i18n="privacyNote">Заявка сохраняется в нашей таблице запросов и используется только для связи с вами по ней. Медицинские документы мы не собираем.</p>
           </form>
         </div>
       </section>
@@ -547,9 +539,7 @@
         </a>
         <p data-i18n="footerStatement">Особенные места, здоровый ритм и люди, с которыми хочется продолжить путь.</p>
         <div class="footer-links">
-          <a href="https://wa.me/" target="_blank" rel="noreferrer">WhatsApp</a>
-          <a href="https://t.me/" target="_blank" rel="noreferrer">Telegram</a>
-          <a href="mailto:hello@albaniacare.travel">Email</a>
+          <a href="#profile" data-i18n="footerContact">Оставить заявку</a>
         </div>
       </div>
       <div class="section-shell footer-bottom">

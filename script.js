@@ -8,13 +8,17 @@ const languageButtons = document.querySelectorAll("[data-lang-switch]");
 const offerFilterButtons = document.querySelectorAll("[data-offer-filter]");
 const offerCards = document.querySelectorAll("[data-offer-category]");
 const roleSelect = document.querySelector("[data-role-select]");
-const careUpload = document.querySelector("[data-care-upload]");
 const metaDescription = document.querySelector('meta[name="description"]');
 const metaOgTitle = document.querySelector('meta[property="og:title"]');
 const metaOgDescription = document.querySelector('meta[property="og:description"]');
 
-const GOOGLE_SHEETS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxQvGsKN-oN-eOWzXxBIZU9_NtM06ETSu9kPjP04bTzkGnlZmofHJOYKW7cXr7YKR0RXw/exec";
-const MAX_UPLOAD_SIZE = 8 * 1024 * 1024;
+const FORM_ENDPOINT = "/api/submit";
+
+// Canonical interest vocabulary. These keys are shared by the discovery
+// links, journey filters, interest checkboxes and journey card categories.
+// Do not introduce new interest values without updating this list and the
+// matching labels in both languages.
+const INTEREST_KEYS = ["nature", "retreat", "food", "community", "stays", "remote", "active", "care"];
 
 const pageMeta = {
   ru: {
@@ -271,30 +275,24 @@ const english = {
   peoplePlaceholder: "For example: founders, creative people, hikers, families...",
   commentsLabel: "Anything else that matters",
   commentsPlaceholder: "Tell us about your pace, place, journey idea or project.",
-  careUploadSummary: "Files for dental travel (optional)",
-  careUploadNote: "Add scans only if you already want a preliminary assessment. Medical decisions are made directly with the clinic.",
-  uploadScanLabel: "Dental image",
-  uploadXrayLabel: "Panoramic scan",
-  consentText: "I agree to receive a reply to this request and relevant offers.",
+  consentText: "I agree to the processing of the data in this request so we can reply and send relevant offers.",
+  privacyNote: "Your request is saved in our requests sheet and used only to contact you about it. We do not collect medical documents.",
   submitButton: "Create my travel profile",
   footerStatement: "Special places, a healthy rhythm and people you will want to keep traveling with.",
+  footerContact: "Send a request",
   footerNote: "Curated journeys & travel community",
 };
 
 const messages = {
   ru: {
-    sending: "Отправляем ваш travel profile...",
-    success: "Спасибо. Профиль отправлен — мы свяжемся с вами, когда появится подходящий формат.",
-    missing: "Форма пока не подключена. Напишите нам в WhatsApp или Telegram.",
-    tooLarge: "Файл слишком большой. Максимальный размер одного файла — 8 MB.",
-    error: "Не удалось отправить форму. Попробуйте еще раз или напишите нам напрямую.",
+    sending: "Отправляем вашу заявку...",
+    success: "Спасибо. Заявка отправлена — мы свяжемся с вами, когда появится подходящий формат.",
+    error: "Не удалось отправить заявку. Данные формы сохранены — проверьте соединение и попробуйте ещё раз.",
   },
   en: {
-    sending: "Sending your travel profile...",
-    success: "Thank you. Your profile is on its way—we will contact you when a suitable format appears.",
-    missing: "The form is not connected yet. Please message us on WhatsApp or Telegram.",
-    tooLarge: "The file is too large. Maximum size per file is 8 MB.",
-    error: "We could not send the form. Please try again or message us directly.",
+    sending: "Sending your request...",
+    success: "Thank you. Your request has been sent—we will contact you when a suitable format appears.",
+    error: "We could not send your request. Your form entries are kept—check your connection and try again.",
   },
 };
 
@@ -388,37 +386,6 @@ function setFormStatus(message, type = "info") {
   formStatus.classList.toggle("is-success", type === "success");
 }
 
-function arrayBufferToBase64(buffer) {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  const chunkSize = 0x8000;
-
-  for (let index = 0; index < bytes.length; index += chunkSize) {
-    binary += String.fromCharCode.apply(null, bytes.subarray(index, index + chunkSize));
-  }
-
-  return btoa(binary);
-}
-
-async function fileToPayload(file) {
-  if (!file || file.size === 0) {
-    return null;
-  }
-
-  if (file.size > MAX_UPLOAD_SIZE) {
-    throw new Error("FILE_TOO_LARGE");
-  }
-
-  const buffer = await file.arrayBuffer();
-
-  return {
-    name: file.name,
-    type: file.type || "application/octet-stream",
-    size: file.size,
-    data: arrayBufferToBase64(buffer),
-  };
-}
-
 function getValues(data, name) {
   return data.getAll(name).filter(Boolean).join(", ");
 }
@@ -440,13 +407,10 @@ function buildProfileNotes(data) {
   return profileLines.join("\n");
 }
 
-async function buildRequestPayload(data) {
-  const dentalScan = await fileToPayload(data.get("dentalScan"));
-  const panoramicXray = await fileToPayload(data.get("panoramicXray"));
-
+function buildRequestPayload(data) {
   return {
     submittedAt: new Date().toISOString(),
-    source: "AC Travel Community",
+    source: "AC Travel Website",
     language: currentLanguage,
     firstName: data.get("firstName") || "",
     lastName: data.get("lastName") || "",
@@ -457,18 +421,8 @@ async function buildRequestPayload(data) {
     returnDate: data.get("returnDate") || "",
     travelers: data.get("travelers") || "",
     comments: buildProfileNotes(data),
-    files: {
-      dentalScan,
-      panoramicXray,
-    },
+    contactConsent: data.get("contactConsent") === "on",
   };
-}
-
-function updateCareUpload() {
-  const careInterest = requestForm.querySelector('input[name="interests"][value="care"]');
-  if (roleSelect.value === "care" || careInterest?.checked) {
-    careUpload.open = true;
-  }
 }
 
 window.addEventListener("scroll", updateHeader, { passive: true });
@@ -526,6 +480,9 @@ offerFilterButtons.forEach((button) => {
 document.querySelectorAll("[data-prefill-interest]").forEach((link) => {
   link.addEventListener("click", () => {
     const value = link.dataset.prefillInterest;
+    if (!INTEREST_KEYS.includes(value)) {
+      return;
+    }
     const checkbox = requestForm.querySelector(`input[name="interests"][value="${value}"]`);
     if (checkbox) {
       checkbox.checked = true;
@@ -541,41 +498,23 @@ document.querySelectorAll("[data-prefill-role]").forEach((link) => {
   });
 });
 
-roleSelect.addEventListener("change", updateCareUpload);
-requestForm.querySelectorAll('input[name="interests"]').forEach((checkbox) => {
-  checkbox.addEventListener("change", updateCareUpload);
-});
-
 requestForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const dictionary = messages[currentLanguage];
-
-  if (!GOOGLE_SHEETS_ENDPOINT) {
-    setFormStatus(dictionary.missing, "error");
-    return;
-  }
 
   submitButton.disabled = true;
   setFormStatus(dictionary.sending);
 
   try {
     const data = new FormData(requestForm);
-    const payload = await buildRequestPayload(data);
-    const response = await fetch(GOOGLE_SHEETS_ENDPOINT, {
+    const payload = buildRequestPayload(data);
+    const response = await fetch(FORM_ENDPOINT, {
       method: "POST",
-      mode: "no-cors",
       headers: {
-        "Content-Type": "text/plain",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     });
-
-    if (response.type === "opaque") {
-      setFormStatus(dictionary.success, "success");
-      requestForm.reset();
-      careUpload.open = false;
-      return;
-    }
 
     if (!response.ok) {
       throw new Error("REQUEST_FAILED");
@@ -583,15 +522,13 @@ requestForm.addEventListener("submit", async (event) => {
 
     const result = await response.json();
     if (result.status !== "success") {
-      throw new Error(result.message || "REQUEST_FAILED");
+      throw new Error("REQUEST_FAILED");
     }
 
     setFormStatus(dictionary.success, "success");
     requestForm.reset();
-    careUpload.open = false;
   } catch (error) {
-    const message = error.message === "FILE_TOO_LARGE" ? dictionary.tooLarge : dictionary.error;
-    setFormStatus(message, "error");
+    setFormStatus(dictionary.error, "error");
   } finally {
     submitButton.disabled = false;
   }

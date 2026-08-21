@@ -1506,8 +1506,7 @@ p {
   gap: 12px;
 }
 
-.faq-list details,
-.care-upload {
+.faq-list details {
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--white);
@@ -1774,33 +1773,6 @@ details[open] summary::after {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.care-upload {
-  margin-top: 18px;
-  background: var(--cream);
-}
-
-.care-upload summary {
-  font-family: var(--sans);
-  font-size: 0.76rem;
-  font-weight: 800;
-}
-
-.care-upload > p,
-.care-upload > .field-row {
-  margin-right: 18px;
-  margin-left: 18px;
-}
-
-.care-upload > p {
-  margin-bottom: 0;
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-
-.care-upload > .field-row {
-  margin-bottom: 18px;
-}
-
 .consent-field {
   display: grid;
   grid-template-columns: 20px 1fr;
@@ -1836,6 +1808,13 @@ details[open] summary::after {
 
 .form-status.is-success {
   color: var(--forest-700);
+}
+
+.form-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
 }
 
 /* Footer */

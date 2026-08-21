@@ -1,0 +1,9 @@
+.DS_Store
+.next/
+node_modules/
+.env
+.env.local
+.env.*.local
+*.tsbuildinfo
+npm-debug.log*
+supabase/.temp/
